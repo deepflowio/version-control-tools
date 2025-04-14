@@ -1,0 +1,39 @@
+name: Create Branches in Multiple Repositories
+
+on:
+  workflow_dispatch:
+    inputs:
+      new_branch:
+        description: '新分支名称如v7.0.1'
+        required: true
+        default: 'new-branch'
+
+jobs:
+  create-branches:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.ACCESS_TOKEN }} 
+    steps:
+      - name: 设置 Git 配置
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Create branches in repositories
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          NEW_BRANCH: ${{ github.event.inputs.new_branch }}
+        run: |
+          REPOS=("deepflowio/deepflow" "deepflowio/deepflow-gui-grafana" "deepflowio/deepflow-app" "deepflowio/deepflow-dashboards")  
+          for REPO in "${REPOS[@]}"; do
+            echo "Processing $REPO"
+            gh repo clone "$REPO"
+            REPO_NAME=$(basename "$REPO")
+            cd "$REPO_NAME"
+            git checkout -b "$NEW_BRANCH"
+            git remote set-url --push origin "https://action:${ACCESS_TOKEN}@github.com/${REPO}.git"
+            git push origin "$NEW_BRANCH"
+            cd ..
+            rm -rf "$REPO_NAME"
+          done
+
