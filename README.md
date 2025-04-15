@@ -7,5 +7,5 @@
 - "deepflowio/deepflow-app" 
 - "deepflowio/deepflow-dashboards"
 
-通过ACTION拉取基于main的新分支，参数需要指定新分支名称
+通过ACTION创建基于main的新分支，参数需要指定新分支名称
 
