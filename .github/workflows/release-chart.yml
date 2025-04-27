@@ -36,4 +36,19 @@ jobs:
             cd ..
             rm -rf "$REPO_NAME"
           done
-
+          sleep 3
+          # 发布release
+          TAGREPOS=("deepflowio/deepflow")
+          for REPO in "${TAGREPOS[@]}"; do
+            echo "Processing $REPO"
+            gh repo clone "$REPO"
+            REPO_NAME=$(basename "$REPO")
+            cd "$REPO_NAME"
+            TAG_NAME="$NEW_BRANCH"
+            git tag "$TAG_NAME"
+            git remote set-url --push origin "https://action:${ACCESS_TOKEN}@github.com/${REPO}.git"
+            git push origin "$TAG_NAME"
+            gh release create "$TAG_NAME" --title "$TAG_NAME" --notes "Release $TAG_NAME"
+            cd ..
+            rm -rf "$REPO_NAME"
+          done
